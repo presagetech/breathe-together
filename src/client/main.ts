@@ -404,6 +404,9 @@ class App {
   }
 
   private renderLobby(msg: Extract<ServerMessage, { type: "room_state" }>): void {
+    // Belt and braces: a lobby exists only for pair rooms (with a code).
+    // Solo contexts never render it.
+    if (!msg.code) return;
     el("room-code").textContent = msg.code ?? "——";
     const list = el("lobby-participants");
     list.replaceChildren();

@@ -341,10 +341,13 @@ export async function startServer(opts: ServerOptions = {}): Promise<RunningServ
     );
   }
 
-  /** Broadcast the lobby/session shape to everyone in a room. */
+  /** Broadcast the lobby/session shape to everyone in a room (pair rooms only). */
   function broadcastRoomState(roomId: string): void {
     const room = manager.getRoom(roomId);
     if (!room) return;
+    // Solo rooms have no lobby; their UI is driven by session messages.
+    // Broadcasting here would kick solo users into the pair lobby screen.
+    if (!room.isPair) return;
     const participants = [...room.participants().values()].map((p) => ({
       id: p.id,
       label: p.label,

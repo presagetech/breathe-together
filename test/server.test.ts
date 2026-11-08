@@ -413,3 +413,23 @@ test("peer_rate flows only after the sharer opts in", async () => {
     await srv.close();
   }
 });
+
+test("solo consent never broadcasts room_state (no lobby teleport)", async () => {
+  const clock = new SimClock();
+  const srv = await startTestServer(clock);
+  const client = await connect(srv.port);
+  try {
+    client.send({ type: "hello" });
+    await client.waitFor((m) => m.type === "welcome");
+    client.send({ type: "consent_granted" });
+    client.send({ type: "ping" });
+    await client.waitFor((m) => m.type === "pong");
+    assert.ok(
+      !client.messages.some((m) => m.type === "room_state"),
+      "solo rooms never get lobby broadcasts",
+    );
+  } finally {
+    client.close();
+    await srv.close();
+  }
+});
